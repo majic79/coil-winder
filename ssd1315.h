@@ -3,6 +3,10 @@
 // Driver library for SSD1315
 // Datasheet: https://cursedhardware.github.io/epd-driver-ic/SSD1315.pdf
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SSD1315_CTRL_CMD ((uint8_t)0x80)
 #define SSD1315_CTRL_DATA ((uint8_t)0x40)
 
@@ -100,3 +104,7 @@ void ssd1315_set_page_addr(uint8_t start, uint8_t end);
 void ssd1315_set_page_start(uint8_t start);
 
 void ssd1315_set_column_addr(uint8_t start, uint8_t end);
+
+#ifdef __cplusplus
+}
+#endif

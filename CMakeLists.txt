@@ -9,13 +9,14 @@ include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-project(coil-winder_project C CXX ASM)
+project(coil-winder C CXX ASM)
 
 pico_sdk_init()
 
-file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/*.c)
+file(GLOB SRC_C_FILES ${PROJECT_SOURCE_DIR}/*.c)
+file(GLOB SRC_CPP_FILES ${PROJECT_SOURCE_DIR}/*.cpp)
 file(GLOB SRC_PIO_FILES ${PROJECT_SOURCE_DIR}/*.pio)
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${SRC_PIO_FILES})
+add_executable(${PROJECT_NAME} ${SRC_C_FILES} ${SRC_CPP_FILES} ${SRC_PIO_FILES})
 
 pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/quadrature_encoder.pio)
 
