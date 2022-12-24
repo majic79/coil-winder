@@ -2,7 +2,8 @@
 
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
-#include "hardware/pio.h"
+
+#include "quadrature.h"
 
 #include "ssd1315.h"
 
@@ -11,8 +12,10 @@
 class PicoProgram {
     public:
         PicoProgram();
-        void setup();
-        void loop();
+        void Setup();
+        void Loop();
+
+        Quadrature quad_enc;
 
         bool led = true;
         bool oled = false;
@@ -38,12 +41,6 @@ class PicoProgram {
         uint8_t sel_w = 1;
         uint8_t sel_x = 2;
         uint8_t sel_y = 0;
-
-        // Use PIO 0
-        PIO pio = pio0;
-        // Use State Machine 0;
-        const uint pio_sm = 0;
-        uint8_t enc_old=0, delta, enc_new;       
 };
 
 extern PicoProgram program;

@@ -1,4 +1,3 @@
-#include "program.h"
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
@@ -11,9 +10,7 @@
 #include "buttons.h"
 
 #include "program.h"
-
-#include "quadrature_encoder.pio.h"
-
+#include "quadrature.h"
 
 PicoProgram::PicoProgram() {
     // Constructor
@@ -21,10 +18,10 @@ PicoProgram::PicoProgram() {
 
 void PicoProgram::handle_gpio(uint gpio, uint32_t event_mask) {
     if(gpio == UI_B1) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) enc_pos--;
+        if(event_mask & GPIO_IRQ_EDGE_RISE) program.quad_enc.Dec();
     }
     if(gpio == UI_B2) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) enc_pos++;
+        if(event_mask & GPIO_IRQ_EDGE_RISE) program.quad_enc.Inc();
     }
     /*
     if(gpio == UI_RE_A) {
@@ -47,7 +44,7 @@ bool PicoProgram::timer_callback(repeating_timer_t *rt) {
 }
 
 
-void PicoProgram::setup() {
+void PicoProgram::Setup() {
     // Program setup phase
     stdio_init_all();
 
@@ -58,16 +55,13 @@ void PicoProgram::setup() {
 
     setup_buttons();
 
+    quad_enc.Setup();
     gpio_set_irq_enabled(UI_B1, GPIO_IRQ_EDGE_RISE, true);
     gpio_set_irq_enabled(UI_B2, GPIO_IRQ_EDGE_RISE, true);
     //gpio_set_irq_enabled(UI_RE_A, GPIO_IRQ_EDGE_RISE, true);
     //gpio_set_irq_enabled(UI_RE_B, GPIO_IRQ_EDGE_RISE, true);
-    gpio_set_irq_enabled(UI_RE_SW, GPIO_IRQ_EDGE_FALL, true);
     gpio_set_irq_callback(PicoProgram::handle_gpio);
     irq_set_enabled(IO_IRQ_BANK0, true);
-
-    uint offset = pio_add_program(pio, &quadrature_encoder_program);
-    quadrature_encoder_program_init(pio, pio_sm, offset, UI_RE_A, 65535);
 
     ssd1315_setup_i2c();
     ssd1315_init();
@@ -106,17 +100,14 @@ void PicoProgram::do_cursor(unsigned char *buf) {
 }
 
 
-void PicoProgram::loop() {
+void PicoProgram::Loop() {
     // Program loop
     if(update) {
         uint8_t new_x;
         update = false;
+        quad_enc.Update();
+        uint8_t enc_pos = quad_enc.Pos();
 
-        enc_new = (uint8_t)(quadrature_encoder_get_count(pio, pio_sm) & 0xFF);
-        delta = enc_new - enc_old;
-        enc_old = enc_new;
-
-        enc_pos -= delta;
         new_x = (enc_pos>>1) & 0x0F;
         if(new_x != sel_x) {
             timing = 0x08;
@@ -126,7 +117,7 @@ void PicoProgram::loop() {
         // Do we display cursor?
         sel_b = (bool)((timing & 0x08) >> 3);
 
-        sprintf(s_line4, "d%02x o%02x n%02x P%02x", delta, enc_old, enc_new, enc_pos);
+        sprintf(s_line4, "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
         display_string((unsigned char *)s_line1,0,0,16);
         display_string((unsigned char *)s_line2,0,1,16);
         display_string((unsigned char *)s_line3,0,2,16);

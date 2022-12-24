@@ -3,10 +3,6 @@
 // Driver library for SSD1315
 // Datasheet: https://cursedhardware.github.io/epd-driver-ic/SSD1315.pdf
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define SSD1315_CTRL_CMD ((uint8_t)0x80)
 #define SSD1315_CTRL_DATA ((uint8_t)0x40)
 
@@ -89,6 +85,10 @@ extern "C" {
 #define PICO_SSD1315_I2C i2c0
 #define PICO_SSD1315_I2C_SDA_PIN 4
 #define PICO_SSD1315_I2C_SCL_PIN 5
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void ssd1315_setup_i2c();
 void ssd1315_send_cmd(uint8_t cmd);
