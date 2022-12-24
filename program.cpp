@@ -53,11 +53,9 @@ void PicoProgram::Setup() {
     gpio_set_dir(LED_PIN, GPIO_OUT);
     gpio_put(LED_PIN, true);
 
-    setup_buttons();
+    buttons.Setup();
 
     quad_enc.Setup();
-    gpio_set_irq_enabled(UI_B1, GPIO_IRQ_EDGE_RISE, true);
-    gpio_set_irq_enabled(UI_B2, GPIO_IRQ_EDGE_RISE, true);
     //gpio_set_irq_enabled(UI_RE_A, GPIO_IRQ_EDGE_RISE, true);
     //gpio_set_irq_enabled(UI_RE_B, GPIO_IRQ_EDGE_RISE, true);
     gpio_set_irq_callback(PicoProgram::handle_gpio);

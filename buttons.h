@@ -5,12 +5,9 @@
 
 #define UI_RE_SW 22
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void setup_buttons();
-
-#ifdef __cplusplus
-}
-#endif
+class Buttons {
+    public:
+        Buttons();
+        void Setup();
+    
+};

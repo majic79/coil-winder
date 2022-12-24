@@ -14,7 +14,7 @@ class PicoProgram {
         PicoProgram();
         void Setup();
         void Loop();
-
+        Buttons buttons;
         Quadrature quad_enc;
 
         bool led = true;
@@ -32,7 +32,7 @@ class PicoProgram {
         uint8_t pattern = 0b00110011;
         uint8_t oled_buf[OLED_BUF_LEN];
 
-        char s_line1[17] = "**Coil-Winder**?";
+        char s_line1[17] = "**Coil--Winder**";
         char s_line2[17] = "1234567890ABCDEF";
         char s_line3[17] = "ABCDEFGHIJKLMNOP";
         char s_line4[17]; // = "QRSTUVWXYZ<>-=+!";
