@@ -54,49 +54,15 @@ void PicoProgram::Setup() {
     gpio_put(LED_PIN, true);
 
     buttons.Setup();
-
     quad_enc.Setup();
-    //gpio_set_irq_enabled(UI_RE_A, GPIO_IRQ_EDGE_RISE, true);
-    //gpio_set_irq_enabled(UI_RE_B, GPIO_IRQ_EDGE_RISE, true);
+
     gpio_set_irq_callback(PicoProgram::handle_gpio);
     irq_set_enabled(IO_IRQ_BANK0, true);
 
-    ssd1315_setup_i2c();
-    ssd1315_init();
-    //ssd1315_address_mode(SSD1315_ADDRMODE_HORIZONTAL);
-    ssd1315_address_mode(SSD1315_ADDRMODE_VERTICAL);
-    //ssd1315_set_page_addr(0x00, 0x03);
-    //ssd1315_set_column_addr(0x00, 0x7F);
-
     add_repeating_timer_us(-100000, PicoProgram::timer_callback, NULL, &this->r_timer);
 
-    //ssd1315_send_cmd(SSD1315_CMD_DISPLAY_ENTIRE_ON);
-
-    for(int a=0; a < OLED_BUF_LEN; a++) oled_buf[a] = 0;
-    ssd1315_send_data(oled_buf, OLED_BUF_LEN);
-
+    disp.Setup();
 }
-
-void PicoProgram::display_string(unsigned char * buf, int pos_x, int pos_y, int len) {
-    for(int a = 0; a < len; a++) {
-        if(buf[a] == 0) break;
-        font_to_buffer(font8x16, oled_buf,pos_x + (a << 3),pos_y, OLED_NUM_PAGES, buf[a]);
-    }
-}
-
-void PicoProgram::do_cursor(unsigned char *buf) {
-    uint baddr;
-    if(sel_b) {
-        baddr = ((sel_x<<3) * OLED_NUM_PAGES) + (sel_y) ;
-        for(int a = 0; a < sel_w << 3; a++) {
-            buf[baddr] = ~buf[baddr];
-            buf[baddr+1] = ~buf[baddr+1];
-            baddr += OLED_NUM_PAGES;
-        }
-    }
-
-}
-
 
 void PicoProgram::Loop() {
     // Program loop
@@ -107,26 +73,26 @@ void PicoProgram::Loop() {
         uint8_t enc_pos = quad_enc.Pos();
 
         new_x = (enc_pos>>1) & 0x0F;
-        if(new_x != sel_x) {
+        if(new_x != disp.GetCursorX()) {
             timing = 0x08;
-            sel_x = new_x;
+            disp.SetCursor(new_x, disp.GetCursorY(), disp.GetCursorZ());
         }
 
         // Do we display cursor?
-        sel_b = (bool)((timing & 0x08) >> 3);
+        disp.SetCursorB((bool)((timing & 0x08) >> 3));
 
         sprintf(s_line4, "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
-        display_string((unsigned char *)s_line1,0,0,16);
-        display_string((unsigned char *)s_line2,0,1,16);
-        display_string((unsigned char *)s_line3,0,2,16);
-        display_string((unsigned char *)s_line4,0,3,16);
+        disp.display_string((unsigned char *)s_line1,0,0,16);
+        disp.display_string((unsigned char *)s_line2,0,1,16);
+        disp.display_string((unsigned char *)s_line3,0,2,16);
+        disp.display_string((unsigned char *)s_line4,0,3,16);
 
         if(oled)
             ssd1315_send_cmd(SSD1315_CMD_DISPLAY_ENTIRE_ON);
         else
             ssd1315_send_cmd(SSD1315_CMD_DISPLAY_RAM);
         //sel_b = !sel_b;
-        do_cursor(oled_buf);
-        ssd1315_send_data(oled_buf, OLED_BUF_LEN);
+        disp.do_cursor();
+        disp.SendBuffer();
     }
 }
