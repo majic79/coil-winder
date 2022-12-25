@@ -2,15 +2,13 @@
 #include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/pio.h"
-//#include "hardware/i2c.h"
 #include "pico/binary_info.h"
 
-#include "ssd1315.h"
-#include "font.h"
-#include "buttons.h"
-
 #include "program.h"
+
+#include "buttons.h"
 #include "quadrature.h"
+#include "display.h"
 
 PicoProgram::PicoProgram() {
     // Constructor
@@ -73,9 +71,9 @@ void PicoProgram::Loop() {
         uint8_t enc_pos = quad_enc.Pos();
 
         new_x = (enc_pos>>1) & 0x0F;
-        if(new_x != disp.GetCursorX()) {
+        if(new_x != disp.c.x) {
             timing = 0x08;
-            disp.SetCursor(new_x, disp.GetCursorY(), disp.GetCursorZ());
+            disp.c.x = new_x;
         }
 
         // Do we display cursor?
@@ -88,9 +86,9 @@ void PicoProgram::Loop() {
         disp.display_string((unsigned char *)s_line4,0,3,16);
 
         if(oled)
-            ssd1315_send_cmd(SSD1315_CMD_DISPLAY_ENTIRE_ON);
+            disp.AllOn();
         else
-            ssd1315_send_cmd(SSD1315_CMD_DISPLAY_RAM);
+            disp.ShowRAM();
         //sel_b = !sel_b;
         disp.do_cursor();
         disp.SendBuffer();

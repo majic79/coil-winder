@@ -5,7 +5,7 @@
 #include "ssd1315.h"
 #include "font.h"
 
-Display::Display() {
+Display::Display() : c(2,0,1) {
     // Constructor
 }
 
@@ -23,6 +23,14 @@ void Display::Setup() {
     ssd1315_send_data(oled_buf, OLED_BUF_LEN);
 }
 
+void Display::AllOn() {
+    ssd1315_send_cmd(SSD1315_CMD_DISPLAY_ENTIRE_ON);
+}
+
+void Display::ShowRAM() {
+    ssd1315_send_cmd(SSD1315_CMD_DISPLAY_RAM);
+}
+
 void Display::SendBuffer() {
     ssd1315_send_data(oled_buf, OLED_BUF_LEN);
 }
@@ -37,8 +45,8 @@ void Display::display_string(unsigned char * buf, int pos_x, int pos_y, int len)
 void Display::do_cursor() {
     uint baddr;
     if(sel_b) {
-        baddr = ((sel_x<<3) * OLED_NUM_PAGES) + (sel_y) ;
-        for(int a = 0; a < sel_z << 3; a++) {
+        baddr = ((c.x<<3) * OLED_NUM_PAGES) + (c.y) ;
+        for(int a = 0; a < c.z << 3; a++) {
             oled_buf[baddr] = ~oled_buf[baddr];
             oled_buf[baddr+1] = ~oled_buf[baddr+1];
             baddr += OLED_NUM_PAGES;
