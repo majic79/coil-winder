@@ -16,10 +16,10 @@ PicoProgram::PicoProgram() {
 
 void PicoProgram::handle_gpio(uint gpio, uint32_t event_mask) {
     if(gpio == UI_B1) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) program.quad_enc.Dec();
+        if(event_mask & GPIO_IRQ_EDGE_RISE) program.disp.c.y--;
     }
     if(gpio == UI_B2) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) program.quad_enc.Inc();
+        if(event_mask & GPIO_IRQ_EDGE_RISE) program.disp.c.y++;
     }
     /*
     if(gpio == UI_RE_A) {
@@ -79,11 +79,10 @@ void PicoProgram::Loop() {
         // Do we display cursor?
         disp.SetCursorB((bool)((timing & 0x08) >> 3));
 
-        sprintf(s_line4, "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
-        disp.display_string((unsigned char *)s_line1,0,0,16);
-        disp.display_string((unsigned char *)s_line2,0,1,16);
-        disp.display_string((unsigned char *)s_line3,0,2,16);
-        disp.display_string((unsigned char *)s_line4,0,3,16);
+        sprintf(s_line[3], "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
+        for(uint8_t a=0; a<4; a++) {
+            disp.display_string((unsigned char *)s_line[a],0,a,16);
+        }
 
         if(oled)
             disp.AllOn();

@@ -29,10 +29,7 @@ class PicoProgram {
     private:
         uint8_t pattern = 0b00110011;
 
-        char s_line1[17] = "**Coil--Winder**";
-        char s_line2[17] = "1234567890ABCDEF";
-        char s_line3[17] = "ABCDEFGHIJKLMNOP";
-        char s_line4[17]; // = "QRSTUVWXYZ<>-=+!";
+        char s_line[4][17] = {"**Coil--Winder**","1234567890ABCDEF","ABCDEFGHIJKLMNOP","----------------"};
 };
 
 extern PicoProgram program;
