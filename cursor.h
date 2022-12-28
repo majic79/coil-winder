@@ -2,11 +2,17 @@
 
 #include <stdio.h>
 
-class Cursor {
+struct cursor_point{
+    uint8_t x;
+    uint8_t y;
+    uint8_t z;
+};
+typedef struct cursor_point Cursor_Point;
+
+class Cursor : public Cursor_Point {
     public:
         Cursor(uint8_t x, uint8_t y, uint8_t z);
-        uint8_t x;  // X position
-        uint8_t y;  // Y position
-        uint8_t z;  // Z = Length of cursor
+        bool visible = false;
+        bool blink = false;
     private:
 };

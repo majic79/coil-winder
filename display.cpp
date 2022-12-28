@@ -42,9 +42,9 @@ void Display::display_string(unsigned char * buf, int pos_x, int pos_y, int len)
     }
 }
 
-void Display::do_cursor() {
+void Display::do_cursor(bool blink) {
     uint baddr;
-    if(sel_b) {
+    if(blink && c.visible) {
         baddr = ((c.x<<3) * OLED_NUM_PAGES) + ((c.y & 0x03)<<1) ;
         for(int a = 0; a < c.z << 3; a++) {
             oled_buf[baddr] = ~oled_buf[baddr];

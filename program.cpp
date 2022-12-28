@@ -10,16 +10,32 @@
 #include "quadrature.h"
 #include "display.h"
 
-PicoProgram::PicoProgram() {
+p_params::p_params(
+        uint16_t x_offset,
+        uint16_t windings_per_layer,
+        uint16_t layer_width,
+        uint16_t coil_windings,
+        uint16_t steps_per_rev,
+        uint16_t steps_per_mm
+    ) {
+    this->x_offset = x_offset;
+    this->windings_per_layer = windings_per_layer;
+    this->layer_width = layer_width;
+    this->coil_windings = coil_windings;
+    this->steps_per_rev = steps_per_rev;
+    this->steps_per_mm = steps_per_mm;
+}
+
+PicoProgram::PicoProgram() : params(20, 14, 10, 250, 200 * 16, 25 * 16) {
     // Constructor
 }
 
 void PicoProgram::handle_gpio(uint gpio, uint32_t event_mask) {
     if(gpio == UI_B1) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) program.disp.c.y--;
+        if(event_mask & GPIO_IRQ_EDGE_RISE && program.menu_offset > 0) program.menu_offset--;
     }
     if(gpio == UI_B2) {
-        if(event_mask & GPIO_IRQ_EDGE_RISE) program.disp.c.y++;
+        if(event_mask & GPIO_IRQ_EDGE_RISE) program.menu_offset++;
     }
     /*
     if(gpio == UI_RE_A) {
@@ -76,10 +92,20 @@ void PicoProgram::Loop() {
             disp.c.x = new_x;
         }
 
-        // Do we display cursor?
-        disp.SetCursorB((bool)((timing & 0x08) >> 3));
+        //sprintf(s_line[3], "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
+        //if(menu_offset < 0) menu_offset = 0;
+        //if(menu_offset > (MENU_ITEMS - 3)) menu_offset = (MENU_ITEMS - 3);
+        for(uint8_t a = 1; a < 4; a++) {
+            //for(uint8_t b = 0; b<16; b++) s_line[a][b] = ' ';
+            uint8_t item = (a-1) + ((uint8_t)menu_offset);
+            if(item >= MENU_ITEMS)
+                sprintf(s_line[a],"----------------");
+            else {
+                sprintf(s_line[a],"%-8s%8d",menus[item].label, menus[item].value);
+                //sprintf(&(s_line[a][menus[item].pt.x]),"%d", menus[item].value);
+            }
+        }
 
-        sprintf(s_line[3], "d%02x o%02x n%02x P%02x", quad_enc.delta, quad_enc.enc_old, quad_enc.enc_new, quad_enc.enc_pos);
         for(uint8_t a=0; a<4; a++) {
             disp.display_string((unsigned char *)s_line[a],0,a,16);
         }
@@ -88,8 +114,8 @@ void PicoProgram::Loop() {
             disp.AllOn();
         else
             disp.ShowRAM();
-        //sel_b = !sel_b;
-        disp.do_cursor();
+
+        disp.do_cursor((bool)((timing & 0x08) >> 3));
         disp.SendBuffer();
     }
 }

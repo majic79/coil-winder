@@ -8,14 +8,12 @@ class Display {
         Display();
         void Setup();
         void display_string(unsigned char * buf, int pos_x, int pos_y, int len);
-        void do_cursor();
+        void do_cursor(bool blink);
         void SendBuffer();
         void ShowRAM();
         void AllOn();
-        inline void SetCursorB(bool b) { sel_b = b;}
         Cursor c;
 
     private:
         uint8_t oled_buf[OLED_BUF_LEN];
-        bool sel_b = false;
 };
